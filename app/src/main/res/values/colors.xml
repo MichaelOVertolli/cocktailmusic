@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="darkpurple" type="color">#FF3D1264</item>
+    <item name="purplegray" type="color">#FFEDE7F6</item>
+    <item name="gray" type="color">#FFEEEEEE</item>
+    <item name="darkgray" type="color">#FFC0C0C0</item>
+    <item name="white" type="color">#FFFFFFFF</item>
+    <item name="black" type="color">#FF000000</item>
+</resources>

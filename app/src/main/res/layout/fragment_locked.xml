@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:background="@color/gray"
+              tools:context=".MainFragment">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="340dp"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center"
+        android:background="@color/darkgray" >
+        <ImageView
+            android:id="@+id/focusImage"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:src="@drawable/bloodsugarsexmagic" />
+        <TextView
+            android:id="@+id/focusSong"
+            android:text="@string/song_test1"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            android:padding="4dp"
+            android:gravity="center"
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:background="@color/white"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <ImageButton
+            android:id="@+id/lockRepeat"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/repeat"/>
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerInParent="true"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/lock"/>
+
+        <ImageButton
+            android:id="@+id/lockShuffle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/shuffle"/>
+
+    </RelativeLayout>
+
+    <SeekBar
+        android:id="@+id/lockSeek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:thumbTint="@color/black"
+        android:progressBackgroundTint="@color/black"
+        android:background="@color/white">
+
+    </SeekBar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:orientation="horizontal"
+        android:background="@color/white" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/timePassed"
+            android:text="@string/time_passed"
+            android:textColor="@color/black"
+            android:textSize="11dp"
+            android:padding="2dp"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/timeMax"
+            android:text="@string/time_max"
+            android:textColor="@color/black"
+            android:textSize="11dp"
+            android:padding="2dp"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:gravity="center"
+        android:background="@color/white">
+        <RelativeLayout
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/lockBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="5dp"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/backskip"/>
+
+        <ImageButton
+            android:id="@+id/lockPlay"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/play"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
+
+        <ImageButton
+            android:id="@+id/lockForward"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/forwardskip"/>
+
+
+    </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Cocktail Music Search</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="set_preferences">Preferences</string>
+    <string name="song_test1">The Power Of Equality</string>
+    <string name="song_test2">Something From Nothing</string>
+    <string name="song_test3">Smells Like Teen Spirit</string>
+    <string name="time_passed">1:20</string>
+    <string name="time_max">4:03</string>
+</resources>
