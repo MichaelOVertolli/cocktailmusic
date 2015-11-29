@@ -41,6 +41,7 @@ public class EchoNestListener implements Response.Listener<JSONObject> {
                 //will add other code later to handle this for user
                 throw new Error(message);
             } else {
+//                Log.d("EchoNestListener", status.toString());
                 throw new Error(message);
             }
         } catch (JSONException e) {e.printStackTrace();}

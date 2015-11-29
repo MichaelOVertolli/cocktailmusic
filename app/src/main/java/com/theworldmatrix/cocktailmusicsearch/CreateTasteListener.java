@@ -21,12 +21,20 @@ public class CreateTasteListener extends EchoNestListener {
 
     @Override
     public void onResponse(JSONObject response) {
-        super.onResponse(response);
         try {
-            String catalogueID = response.getJSONObject("response").getString("id");
+            String state = response.getJSONObject("response").getJSONObject("status").getString("code");
+            String catalogueID;
+            if (state.equals("5")) {
+                catalogueID = response.getJSONObject("response").getJSONObject("status").getString("id");
+                response.getJSONObject("response").getJSONObject("status").put("message", "Success");
+//                Log.d("CreateTasteListener", response.toString());
+            } else {
+                catalogueID = response.getJSONObject("response").getString("id");
+            }
+            super.onResponse(response);
             prefs.putString(key, catalogueID);
             prefs.commit();
-            Log.d("CreateTasteListener", "got response now. id = "+catalogueID);
+//            Log.d("CreateTasteListener", "got response now. id = "+catalogueID);
         } catch (JSONException e) {e.printStackTrace();}
     }
 }

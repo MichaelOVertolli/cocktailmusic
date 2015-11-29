@@ -85,8 +85,9 @@ public class EchoNest {
         String url = BASEURL+CATALOGUE+CREATE+APIKEY+FORMAT+TYPE+NAME+
                 Uri.encode(Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID));
         send(Request.Method.POST, url, null, response, updateRequests);
-        //Log.d("EchoNest", "taste profile sent.");
+        Log.d("EchoNest", url);
     }
+
 
     public void updateTasteProfile(String taste_id, String song_id) {
         JSONObject update = new JSONObject();

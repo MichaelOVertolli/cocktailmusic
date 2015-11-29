@@ -8,6 +8,7 @@
               tools:context=".MainFragment">
 
     <LinearLayout
+        android:id="@+id/focusLayout"
         android:layout_width="wrap_content"
         android:layout_height="241dp"
         android:orientation="vertical"
@@ -16,10 +17,13 @@
         android:background="@color/darkgray"
         android:layout_gravity="center">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/focusImage"
             android:layout_width="200dp"
             android:layout_height="200dp"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            android:backgroundTint="@color/white"
             android:src="@drawable/bloodsugarsexmagic" />
         <TextView
             android:id="@+id/focusSong"
@@ -38,15 +42,19 @@
         android:layout_width="match_parent"
         android:layout_height="151dp">
         <LinearLayout
+            android:id="@+id/leftContextLayout"
             android:orientation="vertical"
             android:layout_width="121dp"
             android:layout_height="match_parent"
             android:background="@color/darkgray"
             android:alpha="0.6">
-            <ImageView
+            <ImageButton
                 android:id="@+id/leftContextImage"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
+                android:backgroundTint="@color/white"
                 android:src="@drawable/sonichighways"
                 />
             <TextView
@@ -72,36 +80,40 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:backgroundTint="@color/white"
+                android:backgroundTint="@color/gray"
                 android:src="@drawable/shuffle"/>
             <ImageButton
                 android:id="@+id/mainClear"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:backgroundTint="@color/white"
+                android:backgroundTint="@color/gray"
                 android:src="@drawable/discardcontext"/>
             <ImageButton
                 android:id="@+id/mainRepeat"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:backgroundTint="@color/white"
+                android:backgroundTint="@color/gray"
                 android:src="@drawable/repeat"/>
 
         </LinearLayout>
 
 
         <LinearLayout
+            android:id="@+id/rightContextLayout"
             android:orientation="vertical"
             android:layout_width="121dp"
             android:layout_height="match_parent"
             android:background="@color/darkgray"
             android:alpha="0.6">
-            <ImageView
+            <ImageButton
                 android:id="@+id/rightContextImage"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
+                android:backgroundTint="@color/white"
                 android:src="@drawable/nevermind" />
             <TextView
                 android:id="@+id/rightContextSong"

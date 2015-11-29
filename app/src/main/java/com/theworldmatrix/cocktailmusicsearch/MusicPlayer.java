@@ -24,7 +24,7 @@ public class MusicPlayer extends MediaPlayer {
                 else rate = (volumeMax[1]-FADEMIN)/(FADELENGTH/FADEDELAY);
                 int[] vol = {volumeCur[0] + rate, volumeCur[1] + rate};
                 setVol(vol);
-                Log.d("fadeIn", name + " called " + Integer.toString(rate) + " " + Integer.toString(volumeCur[0]) + ":" + Integer.toString(volumeCur[1]));
+//                Log.d("fadeIn", name + " called " + Integer.toString(rate) + " " + Integer.toString(volumeCur[0]) + ":" + Integer.toString(volumeCur[1]));
                 fadeHandler.postDelayed(this, FADEDELAY);
             }
         }
@@ -42,7 +42,7 @@ public class MusicPlayer extends MediaPlayer {
                 else rate = (volumeMax[1]-FADEMIN)/(FADELENGTH/FADEDELAY);
                 int[] vol = {volumeCur[0]-rate, volumeCur[1]-rate};
                 setVol(vol);
-                Log.d("fadeOut", name + " called " + Integer.toString(rate) + " " + Integer.toString(volumeCur[0]) + ":" + Integer.toString(volumeCur[1]));
+//                Log.d("fadeOut", name + " called " + Integer.toString(rate) + " " + Integer.toString(volumeCur[0]) + ":" + Integer.toString(volumeCur[1]));
                 fadeHandler.postDelayed(this, FADEDELAY);
             }
         }
@@ -59,6 +59,7 @@ public class MusicPlayer extends MediaPlayer {
     private final int FADELENGTH = 2000;
     private final int FADEMIN = 5;
     private String name;
+    private int lastSong;
 
     public MusicPlayer (String newname, int[] balance, boolean focus, int max, int low, int hi) {
         super();
@@ -75,6 +76,13 @@ public class MusicPlayer extends MediaPlayer {
     @Override
     public void pause() {
         super.pause();
+        fadeHandler.removeCallbacks(fadeIn);
+        fadeHandler.removeCallbacks(fadeOut);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
         fadeHandler.removeCallbacks(fadeIn);
         fadeHandler.removeCallbacks(fadeOut);
     }
@@ -121,5 +129,10 @@ public class MusicPlayer extends MediaPlayer {
     }
 
     public boolean isInFocus() { return inFocus; }
+
+    public void setLastSong(int songNum) {lastSong = songNum;}
+    public int getLastSong() {return lastSong;}
+
+    public String getName() {return name;}
 
 }

@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class MusicService extends Service {
     private List<Song> songs;
     private int songPosn;
 
+    @Override
     public void onCreate() {
         super.onCreate();
         songPosn=0;
@@ -44,6 +46,24 @@ public class MusicService extends Service {
         initMusicPlayer();
         Log.d("Music Service", "Initialized.");
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
+    }
+
+//    @Override
+//    public void onDestroy() {
+//        Log.d("MusicService", "onDestroy called");
+//        playerLeft.stop();
+//        playerRight.stop();
+//        playerCenter.stop();
+//        playerLeft.release();
+//        playerRight.release();
+//        playerCenter.release();
+//        focusHandler.removeCallbacks(focusRunnable);
+//        super.onDestroy();
+//    }
 
     public void initMusicPlayer() {
         playerLeft.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -58,6 +78,21 @@ public class MusicService extends Service {
         playerLeft.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                MusicPlayer player = (MusicPlayer) mp;
+                player.reset();
+                player.setLastSong(songPosn);
+                Song playSong = getSong();
+                long currSong = playSong.getId();
+                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        currSong);
+                try {
+                    player.setDataSource(getApplicationContext(), trackUri);
+                } catch(Exception e) {
+                    Log.e("MUSIC SERVICE", "Error setting data source", e);
+                }
+                player.prepareAsync();
+                sendSetAssetBroadcast(MainFragment.LEFT, playSong);
+                Log.d("MusicService", "Left onCompletionListener called.");
             }
         });
         playerLeft.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -78,6 +113,21 @@ public class MusicService extends Service {
         playerRight.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                MusicPlayer player = (MusicPlayer) mp;
+                player.reset();
+                player.setLastSong(songPosn);
+                Song playSong = getSong();
+                long currSong = playSong.getId();
+                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        currSong);
+                try {
+                    player.setDataSource(getApplicationContext(), trackUri);
+                } catch(Exception e) {
+                    Log.e("MUSIC SERVICE", "Error setting data source", e);
+                }
+                player.prepareAsync();
+                sendSetAssetBroadcast(MainFragment.RIGHT, playSong);
+                Log.d("MusicService", "Right onCompletionListener called.");
             }
         });
         playerRight.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -99,6 +149,21 @@ public class MusicService extends Service {
         playerCenter.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                MusicPlayer player = (MusicPlayer) mp;
+                player.reset();
+                player.setLastSong(songPosn);
+                Song playSong = getSong();
+                long currSong = playSong.getId();
+                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        currSong);
+                try {
+                    player.setDataSource(getApplicationContext(), trackUri);
+                } catch(Exception e) {
+                    Log.e("MUSIC SERVICE", "Error setting data source", e);
+                }
+                player.prepareAsync();
+                sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
+                Log.d("MusicService", "Center onCompletionListener called.");
             }
         });
         playerCenter.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -111,19 +176,22 @@ public class MusicService extends Service {
         focusRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.d("focusRunnable", "called.");
+//                Log.d("focusRunnable", "called.");
                 if (playerCenter.isInFocus()) {
                     playerCenter.setInFocus(false);
                     playerRight.setInFocus(true);
                     playerLeft.setInFocus(false);
+                    sendFadeBroadcast(MainFragment.RIGHT);
                 } else if (playerRight.isInFocus()) {
                     playerCenter.setInFocus(false);
                     playerRight.setInFocus(false);
                     playerLeft.setInFocus(true);
+                    sendFadeBroadcast(MainFragment.LEFT);
                 } else if (playerLeft.isInFocus()) {
                     playerCenter.setInFocus(true);
                     playerRight.setInFocus(false);
                     playerLeft.setInFocus(false);
+                    sendFadeBroadcast(MainFragment.FOCUS);
                 }
                 focusHandler.postDelayed(this, FOCUSDELAY+FADEDELAY);
             }
@@ -135,9 +203,10 @@ public class MusicService extends Service {
         songs=theSongs;
     }
 
-    public void playSong(){
+    public Song[] playSong(){
         playerLeft.reset();
-        Song playSong = songs.get(songPosn);
+        playerLeft.setLastSong(songPosn);
+        Song playSong = getSong();
         long currSong = playSong.getId();
         Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 currSong);
@@ -148,7 +217,8 @@ public class MusicService extends Service {
         }
         playerLeft.prepareAsync();
         playerRight.reset();
-        Song playSong2 = songs.get(songPosn+1);
+        playerRight.setLastSong(songPosn);
+        Song playSong2 = getSong();
         long currSong2 = playSong2.getId();
         Uri trackUri2 = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 currSong2);
@@ -159,7 +229,8 @@ public class MusicService extends Service {
         }
         playerRight.prepareAsync();
         playerCenter.reset();
-        Song playSong3 = songs.get(songPosn+2);
+
+        Song playSong3 = getSong();
         long currSong3 = playSong3.getId();
         Uri trackUri3 = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 currSong3);
@@ -169,6 +240,27 @@ public class MusicService extends Service {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
         playerCenter.prepareAsync();
+        return new Song[]{playSong, playSong2, playSong3};
+    }
+
+    private Song getSong() {
+        Song next = songs.get(songPosn);
+        songPosn++;
+        if (songPosn>=songs.size()) songPosn=0;
+        return next;
+    }
+
+    private void sendFadeBroadcast(int location) {
+        Intent intent = new Intent(MainIncomingReceiver.FADE_INTENT);
+        intent.putExtra(MainIncomingReceiver.LOCATION, location);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void sendSetAssetBroadcast(int location, Song song) {
+        Intent intent = new Intent(MainIncomingReceiver.SET_ASSET_INTENT);
+        intent.putExtra(MainIncomingReceiver.LOCATION, location);
+        intent.putExtra(MainIncomingReceiver.SONG_STRING, song.toString());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     public void setSong(int songIndex){
@@ -208,6 +300,7 @@ public class MusicService extends Service {
         playerLeft.start();
         playerRight.start();
         playerCenter.start();
+        focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
     }
 
     public void playPrev() {
@@ -229,12 +322,17 @@ public class MusicService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+//        Log.d("MusicService", "onUnbind called");
         playerLeft.stop();
         playerRight.stop();
         playerCenter.stop();
+        playerLeft.reset();
+        playerRight.reset();
+        playerCenter.reset();
         playerLeft.release();
         playerRight.release();
         playerCenter.release();
+        focusHandler.removeCallbacks(focusRunnable);
         return false;
     }
 

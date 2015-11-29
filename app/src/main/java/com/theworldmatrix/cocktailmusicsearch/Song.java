@@ -1,5 +1,7 @@
 package com.theworldmatrix.cocktailmusicsearch;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 
 /**
@@ -13,24 +15,38 @@ public class Song {
     private String artist;
     private String album;
     private String album_img;
+    private String artist_img;
 
     public Song(int songID, String songTitle, String songArtist,
-                String songAlbum, String songAlbumImg, String songEchoID) {
+                String songAlbum, String songAlbumImg, String songArtistImg, String songEchoID) {
         id=songID;
         title=songTitle;
         artist=songArtist;
         album=songAlbum;
         album_img=songAlbumImg;
+        artist_img=songArtistImg;
         echoNestID=songEchoID;
     }
 
     public Song(int songID, String songTitle, String songArtist,
-                String songAlbum, String songAlbumImg) {
+                String songAlbum, String songAlbumImg, String songArtistImg) {
         id=songID;
         title=songTitle;
         artist=songArtist;
         album=songAlbum;
         album_img=songAlbumImg;
+        artist_img=songArtistImg;
+    }
+
+    public Song(String songString) {
+        String[] temp = songString.split(",");
+        id=Integer.parseInt(temp[0]);
+        title=temp[1];
+        artist=temp[2];
+        album=temp[3];
+        album_img=temp[4];
+        artist_img=temp[5];
+        echoNestID=temp[6];
     }
 
     @Override
@@ -50,6 +66,7 @@ public class Song {
     public String getArtist(){return artist;}
     public String getAlbum(){return album;}
     public String getAlbum_img(){return album_img;}
+    public String getArtist_img(){return artist_img;}
 
     public void setId(int id){this.id=id;}
     public void setAlbum(String album) {
@@ -65,4 +82,11 @@ public class Song {
         this.title = title;
     }
     public void setAlbum_img(String img) {this.album_img = img;}
+    public void setArtist_img(String img) {this.artist_img = img;}
+
+    @Override
+    public String toString() {
+        return TextUtils.join(",", new String[]{Integer.toString(id), title, artist,
+            album, album_img, artist_img, echoNestID});
+    }
 }

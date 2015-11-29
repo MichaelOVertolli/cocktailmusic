@@ -44,14 +44,14 @@
             android:layout_gravity="center"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="5dp"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/gray"
             android:src="@drawable/repeat"/>
 
         <ImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_centerInParent="true"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/gray"
             android:src="@drawable/lock"/>
 
         <ImageButton
@@ -61,7 +61,7 @@
             android:layout_gravity="center"
             android:layout_alignParentRight="true"
             android:layout_marginRight="10dp"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/gray"
             android:src="@drawable/shuffle"/>
 
     </RelativeLayout>

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class MusicDatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "musicManager";
     private static final String TABLE_SONGS = "songs";
 
@@ -24,6 +25,7 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_ARTIST = "artist";
     private static final String KEY_ALBUM = "album";
     private static final String KEY_ALBUM_IMG = "album_img";
+    private static final String KEY_ARTIST_IMG = "artist_img";
 
     public MusicDatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -32,9 +34,14 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_SONGS + "("
-                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_ECHONEST_ID + " TEXT,"
-                + KEY_TITLE + " TEXT," + KEY_ARTIST + " TEXT," + KEY_ALBUM + " TEXT,"
-                + KEY_ALBUM_IMG + "TEXT" + ")";
+                + KEY_ID + " INTEGER PRIMARY KEY,"
+                + KEY_ECHONEST_ID + " TEXT," //space before TEXT is absolutely crucial.
+                + KEY_TITLE + " TEXT,"
+                + KEY_ARTIST + " TEXT,"
+                + KEY_ALBUM + " TEXT,"
+                + KEY_ALBUM_IMG + " TEXT,"
+                + KEY_ARTIST_IMG + " TEXT" + ")";
+//        Log.d("MusicDatabaseHandler", "onCreate called");
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -57,6 +64,7 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
 
     public void addSong(Song song) {
         SQLiteDatabase db = this.getWritableDatabase();
+//        Log.d("MusicDatabaseHandler", db.toString());
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, song.getId());
@@ -65,6 +73,7 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_ARTIST, song.getArtist());
         values.put(KEY_ALBUM, song.getAlbum());
         values.put(KEY_ALBUM_IMG, song.getAlbum_img());
+        values.put(KEY_ARTIST_IMG, song.getArtist_img());
 
         // Inserting Row
         db.insert(TABLE_SONGS, null, values);
@@ -75,14 +84,15 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_SONGS, new String[] { KEY_ID,
-                        KEY_ECHONEST_ID, KEY_TITLE, KEY_ARTIST, KEY_ALBUM}, KEY_ID + "=?",
+                        KEY_ECHONEST_ID, KEY_TITLE, KEY_ARTIST, KEY_ALBUM, KEY_ALBUM_IMG,
+                        KEY_ARTIST_IMG}, KEY_ID + "=?",
                 new String[] { String.valueOf(id) }, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
-        Song song = new Song(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                cursor.getString(5));
+        Song song = new Song(Integer.parseInt(cursor.getString(0)), cursor.getString(2),
+                cursor.getString(3), cursor.getString(4),
+                cursor.getString(5), cursor.getString(6), cursor.getString(1));
 
         return song;
     }
@@ -99,8 +109,10 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Song song = new Song(Integer.parseInt(cursor.getString(0)),
-                        cursor.getString(1), cursor.getString(2), cursor.getString(3),
-                        cursor.getString(4), cursor.getString(5));
+                        cursor.getString(2), cursor.getString(3), cursor.getString(4),
+                        cursor.getString(5), cursor.getString(6), cursor.getString(1));
+//                Log.d("MusicDatabaseHandler", cursor.toString());
+//                Log.d("MusicDatabaseHandler", song.toString());
                 songList.add(song);
             } while (cursor.moveToNext());
         }
@@ -127,6 +139,7 @@ public class MusicDatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_ARTIST, song.getArtist());
         values.put(KEY_ALBUM, song.getAlbum());
         values.put(KEY_ALBUM_IMG, song.getAlbum_img());
+        values.put(KEY_ARTIST_IMG, song.getArtist_img());
 
 
         // updating row

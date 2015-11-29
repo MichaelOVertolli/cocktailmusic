@@ -3,9 +3,12 @@ package com.theworldmatrix.cocktailmusicsearch;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.Image;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +32,9 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     private Runnable startSetup;
     private Runnable getStorage;
     private Runnable updateTaste;
+
+    private MainIncomingReceiver receiver;
+    private MusicFragment curFragment;
     private MusicService musicSrv;
     private Intent playIntent;
     private boolean musicBound=false;
@@ -55,9 +61,15 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        curFragment = new MainFragment();
+        receiver = new MainIncomingReceiver(curFragment);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MainIncomingReceiver.FADE_INTENT);
+        filter.addAction(MainIncomingReceiver.SET_ASSET_INTENT);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new MainFragment())
+                    .add(R.id.fragment_container, curFragment)
                     .commit();
         }
         musicManager = MusicManager.getInstance(this);
@@ -110,6 +122,11 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     @Override
     protected void onDestroy() {
         stopService(playIntent);
+        musicSrv.pausePlayer();
+        if (musicBound) {
+            unbindService(musicConnection);
+            musicBound=false;
+        }
         musicSrv=null;
         super.onDestroy();
     }
@@ -122,12 +139,17 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
             musicSrv = binder.getService();
             musicSrv.setList(musicManager.getSongList());
             musicBound = true;
-            musicSrv.playSong();
+            Song[] songs = musicSrv.playSong();
+            curFragment.setSongAssets(MainFragment.LEFT, songs[0]);
+            curFragment.setSongAssets(MainFragment.RIGHT, songs[1]);
+            curFragment.setSongAssets(MainFragment.FOCUS, songs[2]);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
+            Log.d("musicConnection", "disconnect called.");
+            musicSrv.pausePlayer();
+            musicSrv=null;
         }
     };
 

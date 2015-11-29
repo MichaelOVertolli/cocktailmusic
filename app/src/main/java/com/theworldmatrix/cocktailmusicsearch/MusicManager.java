@@ -47,7 +47,7 @@ public class MusicManager {
 
     private static String[] imageProjection = {
             MediaStore.Images.Media._ID,
-            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.Images.Media.TITLE,
     };
 //    private static String[] genresProjection = {
 //            MediaStore.Audio.Genres.NAME,
@@ -60,10 +60,13 @@ public class MusicManager {
 
     private MusicManager(Context ctx) {
         context = ctx;
+        context.deleteDatabase("musicManager");
         db = new MusicDatabaseHandler(context);
-        db.emptyTable();
         echoNest = EchoNest.getInstance(context);
         prefs = ctx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor temp = prefs.edit();
+//        temp.remove(TASTE_ID_KEY);
+//        temp.commit();
         if (!prefs.contains(TASTE_ID_KEY)) {
             //Log.d("MusicManager", "prefs failed, calling createTaste");
             CreateTasteListener listener = new CreateTasteListener(prefs.edit(), TASTE_ID_KEY);
@@ -140,20 +143,27 @@ public class MusicManager {
                     continue;
                 } else {
 //                    gettingData = true;
+
                     audioCursor = context.getContentResolver().query(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            imageProjection, MediaStore.MediaColumns.DISPLAY_NAME+" = "+artist+" OR "+
-                                    MediaStore.MediaColumns.DISPLAY_NAME+" = "+album,
+                            imageProjection, MediaStore.Images.Media.TITLE+" = '"+artist+"'",
                             null, null);
-                    int img_id_col_index = mediaCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-                    int img_display_col_index = mediaCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+                    int img_id_col_index = audioCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
                     audioCursor.moveToFirst();
-
+                    String artist_img = audioCursor.getString(img_id_col_index);
+                    audioCursor.close();
+                    audioCursor = context.getContentResolver().query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            imageProjection, MediaStore.Images.Media.TITLE+" = '"+album+"'",
+                            null, null);
+                    audioCursor.moveToFirst();
+                    String album_img = audioCursor.getString(img_id_col_index);
+                    audioCursor.close();
+                    Log.d("MusicManager", "artist id "+artist_img+"; album id "+album_img);
                     SongDBListener listener = new SongDBListener(new Song(id, title, artist, album,
-                            audioCursor.getString(img_id_col_index)), taste_id,
-                            echoNest, db);
+                            album_img, artist_img), taste_id, echoNest, db);
                     Log.d("Music Manager", "retrieving: " + artist+ " " + album + " " + title + " "
-                            + Integer.toString(id) + " " + audioCursor.getString(img_display_col_index));
+                            + Integer.toString(id));// + " " + audioCursor.getString(img_display_col_index));
                     echoNest.getSongID(artist, title, listener);
                 }
 //                ArrayList<String> genres = new ArrayList<String>();
