@@ -101,6 +101,19 @@ public class MainFragment extends MusicFragment {
                 main.playNext();
             }
         });
+        mainShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.shuffle();
+            }
+        });
+        mainClearContext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.changeContext();
+            }
+        });
+
 
         return view;
     }

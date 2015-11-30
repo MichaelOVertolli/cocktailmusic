@@ -40,6 +40,9 @@ public class SongDBListener extends EchoNestListener {
 //            echoNest.updateTasteProfile(taste_id, echoID);
             //echoNest.getSongRequests().remove(super.getThisRequest());
 //            Log.d("SongDBListener", Boolean.toString(echoNest.requestsFinished(echoNest.getSongRequests())));
-        } catch (JSONException e) {e.printStackTrace();}
+        } catch (JSONException e) {
+            Log.d("SongDBListener", song.toString());
+            e.printStackTrace();
+        }
     }
 }

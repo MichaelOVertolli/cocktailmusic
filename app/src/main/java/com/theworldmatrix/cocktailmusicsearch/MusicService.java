@@ -16,6 +16,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by micha_000 on 2015-10-21.
@@ -26,6 +27,8 @@ public class MusicService extends Service {
     private final Handler focusHandler = new Handler();
     private final int FOCUSDELAY = 10000;
     private final int FADEDELAY = 2000;
+    private final boolean FORWARDS = false;
+    private final boolean BACKWARDS = true;
     private Runnable focusRunnable;
     private MusicPlayer playerLeft;
     private MusicPlayer playerRight;
@@ -71,7 +74,7 @@ public class MusicService extends Service {
         playerLeft.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                Log.d("playerLeft", "onPrepared called");
+//                Log.d("playerLeft", "onPrepared called");
                 mp.start();
             }
         });
@@ -79,20 +82,9 @@ public class MusicService extends Service {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 MusicPlayer player = (MusicPlayer) mp;
-                player.reset();
-                player.setLastSong(songPosn);
-                Song playSong = getSong();
-                long currSong = playSong.getId();
-                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        currSong);
-                try {
-                    player.setDataSource(getApplicationContext(), trackUri);
-                } catch(Exception e) {
-                    Log.e("MUSIC SERVICE", "Error setting data source", e);
-                }
-                player.prepareAsync();
+                Song playSong = prepPlayer(player, FORWARDS);
                 sendSetAssetBroadcast(MainFragment.LEFT, playSong);
-                Log.d("MusicService", "Left onCompletionListener called.");
+//                Log.d("MusicService", "Left onCompletionListener called.");
             }
         });
         playerLeft.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -106,7 +98,7 @@ public class MusicService extends Service {
         playerRight.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                Log.d("playerRight", "onPrepared called");
+//                Log.d("playerRight", "onPrepared called");
                 mp.start();
             }
         });
@@ -114,20 +106,9 @@ public class MusicService extends Service {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 MusicPlayer player = (MusicPlayer) mp;
-                player.reset();
-                player.setLastSong(songPosn);
-                Song playSong = getSong();
-                long currSong = playSong.getId();
-                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        currSong);
-                try {
-                    player.setDataSource(getApplicationContext(), trackUri);
-                } catch(Exception e) {
-                    Log.e("MUSIC SERVICE", "Error setting data source", e);
-                }
-                player.prepareAsync();
+                Song playSong = prepPlayer(player, FORWARDS);
                 sendSetAssetBroadcast(MainFragment.RIGHT, playSong);
-                Log.d("MusicService", "Right onCompletionListener called.");
+//                Log.d("MusicService", "Right onCompletionListener called.");
             }
         });
         playerRight.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -142,7 +123,7 @@ public class MusicService extends Service {
         playerCenter.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                Log.d("playerCenter", "onPrepared called");
+//                Log.d("playerCenter", "onPrepared called");
                 mp.start();
             }
         });
@@ -150,20 +131,9 @@ public class MusicService extends Service {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 MusicPlayer player = (MusicPlayer) mp;
-                player.reset();
-                player.setLastSong(songPosn);
-                Song playSong = getSong();
-                long currSong = playSong.getId();
-                Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        currSong);
-                try {
-                    player.setDataSource(getApplicationContext(), trackUri);
-                } catch(Exception e) {
-                    Log.e("MUSIC SERVICE", "Error setting data source", e);
-                }
-                player.prepareAsync();
+                Song playSong = prepPlayer(player, FORWARDS);
                 sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
-                Log.d("MusicService", "Center onCompletionListener called.");
+//                Log.d("MusicService", "Center onCompletionListener called.");
             }
         });
         playerCenter.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -199,47 +169,38 @@ public class MusicService extends Service {
         focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
     }
 
+    private Song prepPlayer(MusicPlayer mp, boolean backwards) {
+        mp.reset();
+        Song playSong;
+        if (backwards) {
+            playSong = getPrevSong(mp);
+        } else if (!mp.isCurrent()) {
+            mp.setNextSong();
+            playSong = songs.get(mp.getCurSong());
+        } else {
+            mp.setCurSong(songPosn);
+            playSong = getSong();
+        }
+        long currSong = playSong.getId();
+        Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                currSong);
+        try {
+            mp.setDataSource(getApplicationContext(), trackUri);
+        } catch(Exception e) {
+            Log.e("MUSIC SERVICE", "Error setting data source: "+playSong.toString(), e);
+        }
+        mp.prepareAsync();
+        return playSong;
+    }
+
     public void setList(List<Song> theSongs) {
         songs=theSongs;
     }
 
     public Song[] playSong(){
-        playerLeft.reset();
-        playerLeft.setLastSong(songPosn);
-        Song playSong = getSong();
-        long currSong = playSong.getId();
-        Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currSong);
-        try {
-            playerLeft.setDataSource(getApplicationContext(), trackUri);
-        } catch(Exception e) {
-            Log.e("MUSIC SERVICE", "Error setting data source", e);
-        }
-        playerLeft.prepareAsync();
-        playerRight.reset();
-        playerRight.setLastSong(songPosn);
-        Song playSong2 = getSong();
-        long currSong2 = playSong2.getId();
-        Uri trackUri2 = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currSong2);
-        try {
-            playerRight.setDataSource(getApplicationContext(), trackUri2);
-        } catch(Exception e) {
-            Log.e("MUSIC SERVICE", "Error setting data source", e);
-        }
-        playerRight.prepareAsync();
-        playerCenter.reset();
-
-        Song playSong3 = getSong();
-        long currSong3 = playSong3.getId();
-        Uri trackUri3 = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currSong3);
-        try {
-            playerCenter.setDataSource(getApplicationContext(), trackUri3);
-        } catch(Exception e) {
-            Log.e("MUSIC SERVICE", "Error setting data source", e);
-        }
-        playerCenter.prepareAsync();
+        Song playSong = prepPlayer(playerLeft, FORWARDS);
+        Song playSong2 = prepPlayer(playerRight, FORWARDS);
+        Song playSong3 = prepPlayer(playerCenter, FORWARDS);
         return new Song[]{playSong, playSong2, playSong3};
     }
 
@@ -248,6 +209,12 @@ public class MusicService extends Service {
         songPosn++;
         if (songPosn>=songs.size()) songPosn=0;
         return next;
+    }
+
+    private Song getPrevSong(MusicPlayer mp) {
+        mp.setPrevSong();
+        Song prev = songs.get(mp.getCurSong());
+        return prev;
     }
 
     private void sendFadeBroadcast(int location) {
@@ -271,6 +238,41 @@ public class MusicService extends Service {
         MusicService getService() {
             return MusicService.this;
         }
+    }
+
+    private void nextSong(MusicPlayer mp, int location, boolean backwards) {
+        mp.stop();
+        Song playSong = prepPlayer(mp, backwards);
+        sendSetAssetBroadcast(location, playSong);
+    }
+
+    public void changeContext() {
+        if (playerCenter.isInFocus()) {
+            nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
+            nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
+        } else if (playerLeft.isInFocus()) {
+            nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
+            nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
+        } else if (playerRight.isInFocus()) {
+            nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
+            nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
+        } else throw new Error("MusicService invalid focus in changeContext");
+    }
+
+    public void shuffle() {
+        Random r = new Random();
+        int index = r.nextInt(songs.size()-5)+5;
+        List<Song> temp = new ArrayList<Song>(songs.subList(0, index));
+        List<Song> temp2 = new ArrayList<Song>(songs.subList(index, songs.size()));
+        temp2.addAll(temp);
+        songs = temp2;
+        songPosn = 0;
+        playerCenter.resetLastSongs();
+        playerRight.resetLastSongs();
+        playerLeft.resetLastSongs();
+        nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
+        nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
+        nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
     }
 
     public int getPosn() {
@@ -304,15 +306,23 @@ public class MusicService extends Service {
     }
 
     public void playPrev() {
-        songPosn--;
-        if(songPosn<0) songPosn=songs.size()-1;
-        playSong();
+        if (playerCenter.isInFocus()) {
+            nextSong(playerCenter, MainFragment.FOCUS, BACKWARDS);
+        } else if (playerLeft.isInFocus()) {
+            nextSong(playerLeft, MainFragment.LEFT, BACKWARDS);
+        } else if (playerRight.isInFocus()) {
+            nextSong(playerRight, MainFragment.RIGHT, BACKWARDS);
+        } else throw new Error("MusicService invalid focus in changeContext");
     }
 
     public void playNext() {
-        songPosn++;
-        if(songPosn>=songs.size()) songPosn=0;
-        playSong();
+        if (playerCenter.isInFocus()) {
+            nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
+        } else if (playerLeft.isInFocus()) {
+            nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
+        } else if (playerRight.isInFocus()) {
+            nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
+        } else throw new Error("MusicService invalid focus in changeContext");
     }
 
     @Override

@@ -5,6 +5,9 @@ import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by M on 2015-11-15.
  */
@@ -59,7 +62,9 @@ public class MusicPlayer extends MediaPlayer {
     private final int FADELENGTH = 2000;
     private final int FADEMIN = 5;
     private String name;
-    private int lastSong;
+    private List<Integer> lastSongs;
+    private int lastSongIndex;
+    private int curSong;
 
     public MusicPlayer (String newname, int[] balance, boolean focus, int max, int low, int hi) {
         super();
@@ -71,6 +76,8 @@ public class MusicPlayer extends MediaPlayer {
         hiVolume = hi;
         setVolMax();
         setVol(volumeMax);
+        curSong = 0;
+        lastSongs = new ArrayList<Integer>();
     }
 
     @Override
@@ -130,8 +137,34 @@ public class MusicPlayer extends MediaPlayer {
 
     public boolean isInFocus() { return inFocus; }
 
-    public void setLastSong(int songNum) {lastSong = songNum;}
-    public int getLastSong() {return lastSong;}
+    public void setCurSong(int songNum) {
+        int index = lastSongs.indexOf(songNum);
+        if (index == -1) {
+            lastSongs.add(songNum);
+            curSong = lastSongs.size()-1;
+        } else {
+            curSong = index;
+        }
+    }
+    public void setPrevSong() {
+        if (curSong != 0) {
+            curSong = curSong-1;
+        }
+    }
+    public void setNextSong() {
+        curSong = curSong+1;
+    }
+    public boolean isCurrent() {
+        boolean state = false;
+        if (curSong == lastSongs.size()-1 | lastSongs.size() == 0) state = true;
+        return state;
+    }
+
+    public void resetLastSongs() {
+        lastSongs.clear();
+        curSong = 0;
+    }
+    public int getCurSong() {return lastSongs.get(curSong);}
 
     public String getName() {return name;}
 

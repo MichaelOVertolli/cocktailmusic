@@ -234,6 +234,9 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
 //        controller.show(0);
     }
 
+    public void shuffle() { musicSrv.shuffle(); }
+    public void changeContext() {musicSrv.changeContext();}
+
     public void playNext() {
         musicSrv.playNext();
     }

@@ -13,9 +13,12 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -83,7 +86,9 @@ public class MusicManager {
     }
 
     public List<Song> getSongList() {
-        return db.getAllSongs();
+        List<Song> songs = db.getAllSongs();
+        Collections.shuffle(songs, new Random(System.nanoTime()));
+        return songs;
     }
 
     private ConcurrentHashMap<JsonObjectRequest, Boolean> getRequestType(int requestType) {
