@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,9 @@ public class MainFragment extends MusicFragment {
     private TextView leftText;
     private TextView rightText;
 
+    private TextView timePassed;
+    private TextView timeMax;
+
     private ImageButton mainPlay;
     private ImageButton mainForward;
     private ImageButton mainBack;
@@ -73,6 +77,9 @@ public class MainFragment extends MusicFragment {
         leftText = (TextView) view.findViewById(R.id.leftContextSong);
         rightText = (TextView) view.findViewById(R.id.rightContextSong);
 
+        timePassed = (TextView) view.findViewById(R.id.timePassed);
+        timeMax = (TextView) view.findViewById(R.id.timeMax);
+
         mainPlay = (ImageButton) view.findViewById(R.id.mainPlay);
         mainBack = (ImageButton) view.findViewById(R.id.mainBack);
         mainForward = (ImageButton) view.findViewById(R.id.mainForward);
@@ -85,8 +92,15 @@ public class MainFragment extends MusicFragment {
         mainPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (main.isPlaying()) main.pause();
-                else main.start();
+                ImageButton self = (ImageButton) v;
+                if (main.isPlaying()) {
+                    main.pause();
+                    self.setImageResource(R.drawable.play);
+                }
+                else {
+                    main.start();
+                    self.setImageResource(R.drawable.pause);
+                }
             }
         });
         mainBack.setOnClickListener(new View.OnClickListener() {
@@ -155,5 +169,14 @@ public class MainFragment extends MusicFragment {
         catch (IOException e) {e.printStackTrace();}
         text.setText(song.getTitle());
 
+    }
+
+    @Override
+    public void setSeekData(int pos, int max) {
+//        Log.d("MainFragment", "setSeekData called.");
+        mainSeek.setMax(max);
+        mainSeek.setProgress(pos);
+        timePassed.setText(main.timeToString(pos));
+        timeMax.setText(main.timeToString(max));
     }
 }

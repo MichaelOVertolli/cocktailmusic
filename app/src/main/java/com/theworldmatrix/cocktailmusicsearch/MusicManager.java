@@ -63,7 +63,7 @@ public class MusicManager {
 
     private MusicManager(Context ctx) {
         context = ctx;
-        context.deleteDatabase("musicManager");
+//        context.deleteDatabase("musicManager");
         db = new MusicDatabaseHandler(context);
         echoNest = EchoNest.getInstance(context);
         prefs = ctx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);

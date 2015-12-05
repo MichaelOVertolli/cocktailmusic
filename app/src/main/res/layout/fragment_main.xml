@@ -186,7 +186,7 @@
             android:layout_height="60dp"
             android:layout_centerHorizontal="true"
             android:backgroundTint="@color/white"
-            android:src="@drawable/play"
+            android:src="@drawable/pause"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"/>
 

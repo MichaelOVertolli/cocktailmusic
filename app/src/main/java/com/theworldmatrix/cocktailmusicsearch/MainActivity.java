@@ -21,6 +21,8 @@ import android.widget.SeekBar;
 
 import android.os.Handler;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class MainActivity extends ActionBarActivity implements MediaController.MediaPlayerControl {
 
@@ -28,6 +30,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     private static MusicManager musicManager;
     private final Handler musicManagerHandler = new Handler();
     private final int READYCHECKDELAY = 2000;
+
 
     private Runnable startSetup;
     private Runnable getStorage;
@@ -66,6 +69,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         IntentFilter filter = new IntentFilter();
         filter.addAction(MainIncomingReceiver.FADE_INTENT);
         filter.addAction(MainIncomingReceiver.SET_ASSET_INTENT);
+        filter.addAction(MainIncomingReceiver.SET_SONG_POS_INTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -301,5 +305,10 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    public String timeToString(int ms) {
+        return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(ms),
+                TimeUnit.MILLISECONDS.toSeconds(ms) % TimeUnit.MINUTES.toSeconds(1));
     }
 }

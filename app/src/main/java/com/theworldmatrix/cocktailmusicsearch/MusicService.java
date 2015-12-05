@@ -25,10 +25,14 @@ public class MusicService extends Service {
 
     private final IBinder musicBind = new MusicBinder();
     private final Handler focusHandler = new Handler();
+    private final Handler songPosHandler = new Handler();
+    private final int SONGPOSCHECKDELAY = 1000;
     private final int FOCUSDELAY = 10000;
     private final int FADEDELAY = 2000;
     private final boolean FORWARDS = false;
     private final boolean BACKWARDS = true;
+
+    private Runnable songPosRunnable;
     private Runnable focusRunnable;
     private MusicPlayer playerLeft;
     private MusicPlayer playerRight;
@@ -71,13 +75,7 @@ public class MusicService extends Service {
     public void initMusicPlayer() {
         playerLeft.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         playerLeft.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        playerLeft.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-//                Log.d("playerLeft", "onPrepared called");
-                mp.start();
-            }
-        });
+        playerLeft.setPrepListener();
         playerLeft.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -95,13 +93,7 @@ public class MusicService extends Service {
         });
         playerRight.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         playerRight.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        playerRight.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-//                Log.d("playerRight", "onPrepared called");
-                mp.start();
-            }
-        });
+        playerRight.setPrepListener();
         playerRight.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -120,13 +112,7 @@ public class MusicService extends Service {
 
         playerCenter.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         playerCenter.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        playerCenter.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-//                Log.d("playerCenter", "onPrepared called");
-                mp.start();
-            }
-        });
+        playerCenter.setPrepListener();
         playerCenter.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -167,6 +153,22 @@ public class MusicService extends Service {
             }
         };
         focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
+
+        songPosRunnable = new Runnable() {
+            @Override
+            public void run() {
+//                Log.d("MusicService", "songPosRunnable called");
+                if (playerCenter.isInFocus() & playerCenter.isPlaying()) {
+                    sendSetSongPos(playerCenter.getCurrentPosition(), playerCenter.getDuration());
+                } else if (playerRight.isInFocus() & playerRight.isPlaying()) {
+                    sendSetSongPos(playerRight.getCurrentPosition(), playerRight.getDuration());
+                } else if (playerLeft.isInFocus() & playerLeft.isPlaying()) {
+                    sendSetSongPos(playerLeft.getCurrentPosition(), playerLeft.getDuration());
+                }
+                songPosHandler.postDelayed(this, SONGPOSCHECKDELAY);
+            }
+        };
+        songPosHandler.postDelayed(songPosRunnable, SONGPOSCHECKDELAY);
     }
 
     private Song prepPlayer(MusicPlayer mp, boolean backwards) {
@@ -215,6 +217,13 @@ public class MusicService extends Service {
         mp.setPrevSong();
         Song prev = songs.get(mp.getCurSong());
         return prev;
+    }
+
+    private void sendSetSongPos(int pos, int max) {
+        Intent intent = new Intent(MainIncomingReceiver.SET_SONG_POS_INTENT);
+        intent.putExtra(MainIncomingReceiver.SONG_POS, pos);
+        intent.putExtra(MainIncomingReceiver.SONG_MAX, max);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void sendFadeBroadcast(int location) {
@@ -292,6 +301,7 @@ public class MusicService extends Service {
         playerRight.pause();
         playerCenter.pause();
         focusHandler.removeCallbacks(focusRunnable);
+        songPosHandler.removeCallbacks(songPosRunnable);
     }
 
     public void seek(int posn) {
@@ -303,6 +313,7 @@ public class MusicService extends Service {
         playerRight.start();
         playerCenter.start();
         focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
+        songPosHandler.postDelayed(songPosRunnable, SONGPOSCHECKDELAY);
     }
 
     public void playPrev() {
@@ -343,6 +354,7 @@ public class MusicService extends Service {
         playerRight.release();
         playerCenter.release();
         focusHandler.removeCallbacks(focusRunnable);
+        songPosHandler.removeCallbacks(songPosRunnable);
         return false;
     }
 

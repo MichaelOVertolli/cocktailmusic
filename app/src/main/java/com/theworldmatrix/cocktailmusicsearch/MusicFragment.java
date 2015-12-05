@@ -9,4 +9,5 @@ public abstract class MusicFragment extends Fragment {
 
     public abstract void setSongAssets(int location, Song song);
     public abstract void setFocus(int location);
+    public abstract void setSeekData(int pos, int max);
 }
