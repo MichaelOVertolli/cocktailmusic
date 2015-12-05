@@ -89,6 +89,44 @@ public class MainFragment extends MusicFragment {
 
         mainSeek = (SeekBar) view.findViewById(R.id.mainSeek);
 
+        focusImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(FOCUS);
+            }
+        });
+        rightImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(RIGHT);
+            }
+        });
+        leftImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(LEFT);
+            }
+        });
+
+        focusText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(FOCUS);
+            }
+        });
+        rightText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(RIGHT);
+            }
+        });
+        leftText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                main.setSongFocus(LEFT);
+            }
+        });
+
         mainPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,15 +206,15 @@ public class MainFragment extends MusicFragment {
 
     @Override
     public void setFocus(int location) {
+        focusLayout.setAlpha(FADE);
+        leftLayout.setAlpha(FADE);
+        rightLayout.setAlpha(FADE);
         if (location == FOCUS) {
             focusLayout.setAlpha(FULL);
-            leftLayout.setAlpha(FADE);
         } else if (location == RIGHT) {
             rightLayout.setAlpha(FULL);
-            focusLayout.setAlpha(FADE);
         } else if (location == LEFT) {
             leftLayout.setAlpha(FULL);
-            rightLayout.setAlpha(FADE);
         } else throw new Error("MainFragment: Invalid location.");
     }
 

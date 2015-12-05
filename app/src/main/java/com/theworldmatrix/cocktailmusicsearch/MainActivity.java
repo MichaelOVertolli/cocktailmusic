@@ -258,6 +258,10 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         if(musicSrv!=null&&musicBound) musicSrv.setRepeat(repeat);
     }
 
+    public void setSongFocus(int location) {
+        if(musicSrv!=null&&musicBound) musicSrv.setSongFocus(location);
+    }
+
     @Override
     public void start() {
         musicSrv.go();

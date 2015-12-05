@@ -141,6 +141,10 @@ public class MusicPlayer extends MediaPlayer {
         fadeHandler.postDelayed(fadeOut, FADEDELAY);
     }
 
+    public void setInFocusNoFade(boolean focus) {
+        this.inFocus = focus;
+    }
+
     public boolean isInFocus() { return inFocus; }
 
     public void setCurSong(int songNum) {

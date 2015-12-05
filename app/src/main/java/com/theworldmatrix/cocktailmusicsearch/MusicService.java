@@ -26,7 +26,7 @@ public class MusicService extends Service {
     private final IBinder musicBind = new MusicBinder();
     private final Handler focusHandler = new Handler();
     private final Handler songPosHandler = new Handler();
-    private final int SONGPOSCHECKDELAY = 1000;
+    private final int SONGPOSCHECKDELAY = 500;
     private final int FOCUSDELAY = 10000;
     private final int FADEDELAY = 2000;
     private final boolean FORWARDS = false;
@@ -209,6 +209,21 @@ public class MusicService extends Service {
 
     public void setList(List<Song> theSongs) {
         songs=theSongs;
+    }
+
+    public void setSongFocus(int location) {
+        focusHandler.removeCallbacks(focusRunnable);
+        playerCenter.setInFocusNoFade(false);
+        playerRight.setInFocusNoFade(false);
+        playerLeft.setInFocusNoFade(false);
+        if (location == MainFragment.FOCUS) {
+            playerLeft.setInFocusNoFade(true);
+        } else if (location == MainFragment.RIGHT) {
+            playerCenter.setInFocusNoFade(true);
+        } else if (location == MainFragment.LEFT) {
+            playerRight.setInFocusNoFade(true);
+        } else throw new Error("MusicService setSongFocus invalid location.");
+        focusHandler.postDelayed(focusRunnable, 0);
     }
 
     public Song[] playSong(){
