@@ -66,7 +66,6 @@ public class MusicPlayer extends MediaPlayer {
     private List<Integer> lastSongs;
     private int lastSongIndex;
     private int curSong;
-    private boolean prepared;
 
     public MusicPlayer (String newname, int[] balance, boolean focus, int max, int low, int hi) {
         super();
@@ -80,13 +79,11 @@ public class MusicPlayer extends MediaPlayer {
         setVol(volumeMax);
         curSong = 0;
         lastSongs = new ArrayList<Integer>();
-        prepared = false;
     }
 
     @Override
     public void reset() {
         super.reset();
-        prepared = false;
     }
 
     @Override
@@ -165,7 +162,7 @@ public class MusicPlayer extends MediaPlayer {
     }
     public boolean isCurrent() {
         boolean state = false;
-        if (curSong == lastSongs.size()-1 | lastSongs.size() == 0) state = true;
+        if (curSong == lastSongs.size()-1 || lastSongs.size() == 0) state = true;
         return state;
     }
 
@@ -179,18 +176,10 @@ public class MusicPlayer extends MediaPlayer {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mp.start();
-                ((MusicPlayer) mp).setPrepared();
             }
         });
     }
 
-    public void setPrepared() {
-        prepared = true;
-    }
-
-    public boolean isPrepared() {
-        return prepared;
-    }
 
     public int getCurSong() {return lastSongs.get(curSong);}
 

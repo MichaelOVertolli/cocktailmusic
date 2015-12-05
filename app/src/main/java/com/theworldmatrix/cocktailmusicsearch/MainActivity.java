@@ -249,6 +249,15 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         musicSrv.playPrev();
     }
 
+    public boolean isRepeating() {
+        if(musicSrv!=null&&musicBound) return musicSrv.isRepeating();
+        else return false;
+    }
+
+    public void setRepeat(boolean repeat) {
+        if(musicSrv!=null&&musicBound) musicSrv.setRepeat(repeat);
+    }
+
     @Override
     public void start() {
         musicSrv.go();
@@ -273,7 +282,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
 
     @Override
     public void seekTo(int pos) {
-        musicSrv.seek(pos);
+        if(musicSrv!=null&&musicBound) musicSrv.seek(pos);
     }
 
     @Override

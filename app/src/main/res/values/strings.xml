@@ -7,6 +7,6 @@
     <string name="song_test1">The Power Of Equality</string>
     <string name="song_test2">Something From Nothing</string>
     <string name="song_test3">Smells Like Teen Spirit</string>
-    <string name="time_passed">1:20</string>
-    <string name="time_max">4:03</string>
+    <string name="time_passed">00:00</string>
+    <string name="time_max">00:00</string>
 </resources>

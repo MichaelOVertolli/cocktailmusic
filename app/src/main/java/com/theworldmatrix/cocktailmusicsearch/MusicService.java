@@ -79,10 +79,14 @@ public class MusicService extends Service {
         playerLeft.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                MusicPlayer player = (MusicPlayer) mp;
-                Song playSong = prepPlayer(player, FORWARDS);
-                sendSetAssetBroadcast(MainFragment.LEFT, playSong);
+                if (mp.isLooping()) {
+                    mp.start();
+                } else {
+                    MusicPlayer player = (MusicPlayer) mp;
+                    Song playSong = prepPlayer(player, FORWARDS);
+                    sendSetAssetBroadcast(MainFragment.LEFT, playSong);
 //                Log.d("MusicService", "Left onCompletionListener called.");
+                }
             }
         });
         playerLeft.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -97,10 +101,14 @@ public class MusicService extends Service {
         playerRight.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                MusicPlayer player = (MusicPlayer) mp;
-                Song playSong = prepPlayer(player, FORWARDS);
-                sendSetAssetBroadcast(MainFragment.RIGHT, playSong);
+                if (mp.isLooping()) {
+                    mp.start();
+                } else {
+                    MusicPlayer player = (MusicPlayer) mp;
+                    Song playSong = prepPlayer(player, FORWARDS);
+                    sendSetAssetBroadcast(MainFragment.RIGHT, playSong);
 //                Log.d("MusicService", "Right onCompletionListener called.");
+                }
             }
         });
         playerRight.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -116,10 +124,14 @@ public class MusicService extends Service {
         playerCenter.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                MusicPlayer player = (MusicPlayer) mp;
-                Song playSong = prepPlayer(player, FORWARDS);
-                sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
+                if (mp.isLooping()) {
+                    mp.start();
+                } else {
+                    MusicPlayer player = (MusicPlayer) mp;
+                    Song playSong = prepPlayer(player, FORWARDS);
+                    sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
 //                Log.d("MusicService", "Center onCompletionListener called.");
+                }
             }
         });
         playerCenter.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -158,11 +170,11 @@ public class MusicService extends Service {
             @Override
             public void run() {
 //                Log.d("MusicService", "songPosRunnable called");
-                if (playerCenter.isInFocus() & playerCenter.isPlaying()) {
+                if (playerCenter.isInFocus() && playerCenter.isPlaying()) {
                     sendSetSongPos(playerCenter.getCurrentPosition(), playerCenter.getDuration());
-                } else if (playerRight.isInFocus() & playerRight.isPlaying()) {
+                } else if (playerRight.isInFocus() && playerRight.isPlaying()) {
                     sendSetSongPos(playerRight.getCurrentPosition(), playerRight.getDuration());
-                } else if (playerLeft.isInFocus() & playerLeft.isPlaying()) {
+                } else if (playerLeft.isInFocus() && playerLeft.isPlaying()) {
                     sendSetSongPos(playerLeft.getCurrentPosition(), playerLeft.getDuration());
                 }
                 songPosHandler.postDelayed(this, SONGPOSCHECKDELAY);
@@ -293,7 +305,26 @@ public class MusicService extends Service {
     }
 
     public boolean isPng() {
-        return playerCenter.isPlaying();
+        boolean state = false;
+        if (playerCenter.isInFocus() && playerCenter.isPlaying() ||
+                playerLeft.isInFocus() && playerLeft.isPlaying() ||
+                playerRight.isInFocus() && playerRight.isPlaying()) state = true;
+        return state;
+    }
+
+    public void setRepeat(boolean looping) {
+        Log.d("MusicService", "setRepeat called");
+        playerCenter.setLooping(looping);
+        playerRight.setLooping(looping);
+        playerLeft.setLooping(looping);
+    }
+
+    public boolean isRepeating() {
+        boolean state = false;
+        if (playerCenter.isInFocus() && playerCenter.isLooping() ||
+                playerLeft.isInFocus() && playerLeft.isLooping() ||
+                playerRight.isInFocus() && playerRight.isLooping()) state = true;
+        return state;
     }
 
     public void pausePlayer() {
@@ -305,7 +336,14 @@ public class MusicService extends Service {
     }
 
     public void seek(int posn) {
-        playerCenter.seekTo(posn);
+        if (playerCenter.isInFocus() && playerCenter.isPlaying()) {
+            playerCenter.seekTo(posn);
+        } else if (playerRight.isInFocus() && playerRight.isPlaying()) {
+            playerRight.seekTo(posn);
+        } else if (playerLeft.isInFocus() && playerLeft.isPlaying()) {
+            playerLeft.seekTo(posn);
+        }
+
     }
 
     public void go() {

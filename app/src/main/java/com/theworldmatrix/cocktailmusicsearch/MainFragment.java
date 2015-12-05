@@ -95,10 +95,12 @@ public class MainFragment extends MusicFragment {
                 ImageButton self = (ImageButton) v;
                 if (main.isPlaying()) {
                     main.pause();
+                    mainSeek.setEnabled(false);
                     self.setImageResource(R.drawable.play);
                 }
                 else {
                     main.start();
+                    mainSeek.setEnabled(true);
                     self.setImageResource(R.drawable.pause);
                 }
             }
@@ -121,10 +123,42 @@ public class MainFragment extends MusicFragment {
                 main.shuffle();
             }
         });
+        mainRepeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+        public void onClick(View v) {
+                if (main.isRepeating()) {
+                    mainRepeat.setImageResource(R.drawable.repeat);
+                    main.setRepeat(false);
+                } else {
+                    mainRepeat.setImageResource(R.drawable.repeat_highlight);
+                    main.setRepeat(true);
+                }
+            }
+        });
         mainClearContext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 main.changeContext();
+            }
+        });
+        mainSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && main.isPlaying()) {
+                    seekBar.setProgress(progress);
+                    main.seekTo(progress);
+                    timePassed.setText(main.timeToString(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
 
