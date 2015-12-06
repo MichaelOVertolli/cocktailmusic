@@ -183,6 +183,56 @@ public class MusicService extends Service {
         songPosHandler.postDelayed(songPosRunnable, SONGPOSCHECKDELAY);
     }
 
+    public void changeToLocked() {
+        focusHandler.removeCallbacks(focusRunnable);
+        if (!playerCenter.isInFocus()) {
+            playerCenter.stop();
+            playerCenter.setLockedOff();
+        }
+        else {
+            playerCenter.setLockedOn();
+        }
+        if (!playerRight.isInFocus()) {
+            playerRight.stop();
+            playerRight.setLockedOff();
+        }
+        else playerRight.setLockedOn();
+        if (!playerLeft.isInFocus()) {
+            playerLeft.stop();
+            playerLeft.setLockedOff();
+        }
+        else playerLeft.setLockedOn();
+
+    }
+
+    public void changeToUnlocked() {
+        playerCenter.unlock();
+        playerLeft.unlock();
+        playerRight.unlock();
+        if (playerCenter.isInFocus()) {
+            sendFadeBroadcast(MainFragment.FOCUS);
+            Song playSong = prepPlayer(playerRight, FORWARDS);
+            Song playSong2 = prepPlayer(playerLeft, FORWARDS);
+            sendSetAssetBroadcast(MainFragment.RIGHT, playSong);
+            sendSetAssetBroadcast(MainFragment.LEFT, playSong2);
+        }
+        if (playerLeft.isInFocus()) {
+            sendFadeBroadcast(MainFragment.LEFT);
+            Song playSong = prepPlayer(playerCenter, FORWARDS);
+            Song playSong2 = prepPlayer(playerRight, FORWARDS);
+            sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
+            sendSetAssetBroadcast(MainFragment.RIGHT, playSong2);
+        }
+        if (playerRight.isInFocus()) {
+            sendFadeBroadcast(MainFragment.RIGHT);
+            Song playSong = prepPlayer(playerCenter, FORWARDS);
+            Song playSong2 = prepPlayer(playerLeft, FORWARDS);
+            sendSetAssetBroadcast(MainFragment.FOCUS, playSong);
+            sendSetAssetBroadcast(MainFragment.LEFT, playSong2);
+        }
+        focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
+    }
+
     private Song prepPlayer(MusicPlayer mp, boolean backwards) {
         mp.reset();
         Song playSong;
@@ -209,6 +259,31 @@ public class MusicService extends Service {
 
     public void setList(List<Song> theSongs) {
         songs=theSongs;
+    }
+
+    public void loadSongAssets() {
+        Log.d("MusicService", "loadSongAssets called");
+        if (!playerCenter.isLockedOff()) {
+            Song songCenter = songs.get(playerCenter.getCurSong());
+            sendSetAssetBroadcast(MainFragment.FOCUS, songCenter);
+        }
+        if (!playerLeft.isLockedOff()) {
+            Song songLeft = songs.get(playerLeft.getCurSong());
+            sendSetAssetBroadcast(MainFragment.LEFT, songLeft);
+        }
+        if (!playerRight.isLockedOff()) {
+            Song songRight = songs.get(playerRight.getCurSong());
+            sendSetAssetBroadcast(MainFragment.RIGHT, songRight);
+        }
+    }
+
+    public boolean isInFocus(int location) {
+        boolean state = false;
+        if (location == MainFragment.FOCUS) state = playerCenter.isInFocus();
+        else if (location == MainFragment.RIGHT) state = playerRight.isInFocus();
+        else if (location == MainFragment.LEFT) state = playerLeft.isInFocus();
+        else throw new Error("Invalid location isInFocus");
+        return state;
     }
 
     public void setSongFocus(int location) {
@@ -306,9 +381,9 @@ public class MusicService extends Service {
         playerCenter.resetLastSongs();
         playerRight.resetLastSongs();
         playerLeft.resetLastSongs();
-        nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
-        nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
-        nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
+        if (!playerCenter.isLockedOff()) nextSong(playerCenter, MainFragment.FOCUS, FORWARDS);
+        if (!playerRight.isLockedOff()) nextSong(playerRight, MainFragment.RIGHT, FORWARDS);
+        if (!playerLeft.isLockedOff()) nextSong(playerLeft, MainFragment.LEFT, FORWARDS);
     }
 
     public int getPosn() {
@@ -346,8 +421,10 @@ public class MusicService extends Service {
         playerLeft.pause();
         playerRight.pause();
         playerCenter.pause();
-        focusHandler.removeCallbacks(focusRunnable);
-        songPosHandler.removeCallbacks(songPosRunnable);
+        if (!playerCenter.isLockedOff() && !playerRight.isLockedOff() && !playerLeft.isLockedOff()) {
+            focusHandler.removeCallbacks(focusRunnable);
+            songPosHandler.removeCallbacks(songPosRunnable);
+        }
     }
 
     public void seek(int posn) {
@@ -365,8 +442,10 @@ public class MusicService extends Service {
         playerLeft.start();
         playerRight.start();
         playerCenter.start();
-        focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
-        songPosHandler.postDelayed(songPosRunnable, SONGPOSCHECKDELAY);
+        if (!playerCenter.isLockedOff() && !playerRight.isLockedOff() && !playerLeft.isLockedOff()) {
+            focusHandler.postDelayed(focusRunnable, FOCUSDELAY);
+            songPosHandler.postDelayed(songPosRunnable, SONGPOSCHECKDELAY);
+        }
     }
 
     public void playPrev() {

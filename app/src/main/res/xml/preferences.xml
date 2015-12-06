@@ -3,7 +3,7 @@
     <ListPreference     android:title="Display Options"
                         android:summary="Select what to display and filter."
                         android:key="displayType"
-                        android:defaultValue="1"
+                        android:defaultValue="0"
                         android:entries="@array/displayOptionsArray"
                         android:entryValues="@array/displayOptionsValues" />
     <CheckBoxPreference android:title="Display Song Names"

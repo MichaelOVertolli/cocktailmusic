@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -24,8 +26,13 @@ import android.os.Handler;
 import java.util.concurrent.TimeUnit;
 
 
-public class MainActivity extends ActionBarActivity implements MediaController.MediaPlayerControl {
+public class MainActivity extends ActionBarActivity implements MediaController.MediaPlayerControl, SharedPreferences.OnSharedPreferenceChangeListener {
 
+    public static final String DISPLAY_PREF = "displayType";
+    public static final String SONG_PREF = "songNames";
+    public static final int ALBUM_PREF_VAL = 0;
+    public static final int ARTIST_PREF_VAL = 1;
+    public static final int SONGS_ONLY_PREF_VAL = 2;
 
     private static MusicManager musicManager;
     private final Handler musicManagerHandler = new Handler();
@@ -42,28 +49,17 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     private Intent playIntent;
     private boolean musicBound=false;
 //    private MusicController controller;
-    private ImageButton mainPlay;
-    private ImageButton mainForward;
-    private ImageButton mainBack;
-    private ImageButton mainShuffle;
-    private ImageButton mainRepeat;
-    private ImageButton mainClearContext;
-
-    private SeekBar mainSeek;
-
-    private ImageButton lockPlay;
-    private ImageButton lockForward;
-    private ImageButton lockBack;
-    private ImageButton lockShuffle;
-    private ImageButton lockRepeat;
-
-    private SeekBar lockSeek;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("MainActivity", "onCreate called.");
         setContentView(R.layout.activity_main);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+//        Log.d("MainActivity", "Preference: " + PreferenceManager.getDefaultSharedPreferences(this).getString(DISPLAY_PREF, ""));
+//        Log.d("MainActivity", "Preference: " + PreferenceManager.getDefaultSharedPreferences(this).getString(DISPLAY_PREF, ""));
         curFragment = new MainFragment();
         receiver = new MainIncomingReceiver(curFragment);
         IntentFilter filter = new IntentFilter();
@@ -77,7 +73,6 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
                     .commit();
         }
         musicManager = MusicManager.getInstance(this);
-        //setListeners();
     }
 
     @Override
@@ -135,6 +130,19 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         super.onDestroy();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+//
+//    @Override
+//    protected void onPause() {
+    //doesn't work as the activity gets paused when preference fragment is called.
+//        super.onPause();
+//        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+//    }
+
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -180,62 +188,24 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         }
     }
 
-    private void setListeners() {
-        mainPlay = (ImageButton) findViewById(R.id.mainPlay);
-        mainBack = (ImageButton) findViewById(R.id.mainBack);
-        mainForward = (ImageButton) findViewById(R.id.mainForward);
-        mainShuffle = (ImageButton) findViewById(R.id.mainShuffle);
-        mainRepeat = (ImageButton) findViewById(R.id.mainRepeat);
-        mainClearContext = (ImageButton) findViewById(R.id.mainClear);
+    public void lock() {
+        curFragment = new LockedFragment();
+        receiver.setFragment(curFragment);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, curFragment)
+                .commit();
+        musicSrv.changeToLocked();
+        musicSrv.loadSongAssets();
+    }
 
-        mainSeek = (SeekBar) findViewById(R.id.mainSeek);
-
-        //lockPlay = (ImageButton) findViewById(R.id.lockPlay);
-        //lockBack = (ImageButton) findViewById(R.id.lockBack);
-        //lockForward = (ImageButton) findViewById(R.id.lockForward);
-        //lockShuffle = (ImageButton) findViewById(R.id.lockShuffle);
-        //lockRepeat = (ImageButton) findViewById(R.id.lockRepeat);
-
-        //lockSeek = (SeekBar) findViewById(R.id.lockSeek);
-
-        mainPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isPlaying()) pause();
-                else start();
-            }
-        });
-        mainBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playPrev();
-            }
-        });
-        mainForward.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playNext();
-            }
-        });
-
-//        controller = new MusicController(this);
-//        controller.setPrevNextListeners(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                playNext();
-//            }
-//        }, new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                 playPrev();
-//            }
-//        });
-//
-//        controller.setMediaPlayer(this);
-//        //controller.setAnchorView(findViewById(R.id.musicController));
-//        controller.setEnabled(true);
-//        controller.setPadding(0, 0, 0, 100);
-//        controller.show(0);
+    public void unlock() {
+        curFragment = new MainFragment();
+        receiver.setFragment(curFragment);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, curFragment)
+                .commit();
+        musicSrv.changeToUnlocked();
+        musicSrv.loadSongAssets();
     }
 
     public void shuffle() { musicSrv.shuffle(); }
@@ -258,8 +228,20 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         if(musicSrv!=null&&musicBound) musicSrv.setRepeat(repeat);
     }
 
+    public boolean isInFocus(int location) {
+        boolean state = false;
+        if(musicSrv!=null&&musicBound) state = musicSrv.isInFocus(location);
+        return state;
+    }
+
     public void setSongFocus(int location) {
         if(musicSrv!=null&&musicBound) musicSrv.setSongFocus(location);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d("MainActivity", "onSharedPrefs called. "+key);
+        if (key.equals(DISPLAY_PREF) || key.equals(SONG_PREF)) musicSrv.loadSongAssets();
     }
 
     @Override

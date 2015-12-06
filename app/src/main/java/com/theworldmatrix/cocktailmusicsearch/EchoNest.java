@@ -74,7 +74,7 @@ public class EchoNest {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("EchoNest", "Failed to get JsonObj.");
+                        Log.e("EchoNest", "Failed to get JsonObj."+error);
                     }
                 });
         response.setRequestParams(request, requestMap);

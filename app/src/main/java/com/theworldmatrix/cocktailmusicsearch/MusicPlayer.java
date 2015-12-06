@@ -66,6 +66,7 @@ public class MusicPlayer extends MediaPlayer {
     private List<Integer> lastSongs;
     private int lastSongIndex;
     private int curSong;
+    private boolean lockedOff;
 
     public MusicPlayer (String newname, int[] balance, boolean focus, int max, int low, int hi) {
         super();
@@ -79,25 +80,35 @@ public class MusicPlayer extends MediaPlayer {
         setVol(volumeMax);
         curSong = 0;
         lastSongs = new ArrayList<Integer>();
+        lockedOff = false;
+    }
+
+    @Override
+    public void start() {
+        if (!lockedOff) super.start();
     }
 
     @Override
     public void reset() {
-        super.reset();
+        if (!lockedOff) super.reset();
     }
 
     @Override
     public void pause() {
-        super.pause();
-        fadeHandler.removeCallbacks(fadeIn);
-        fadeHandler.removeCallbacks(fadeOut);
+        if (!lockedOff) {
+            super.pause();
+            fadeHandler.removeCallbacks(fadeIn);
+            fadeHandler.removeCallbacks(fadeOut);
+        }
     }
 
     @Override
     public void stop() {
-        super.stop();
-        fadeHandler.removeCallbacks(fadeIn);
-        fadeHandler.removeCallbacks(fadeOut);
+        if (!lockedOff) {
+            super.stop();
+            fadeHandler.removeCallbacks(fadeIn);
+            fadeHandler.removeCallbacks(fadeOut);
+        }
     }
 
     public float convertVol(int vol) {
@@ -111,6 +122,22 @@ public class MusicPlayer extends MediaPlayer {
         else vol = lowVolume;
         volumeMax[0] = volumeBalance[0]*vol;
         volumeMax[1] = volumeBalance[1]*vol;
+    }
+
+    public void setLockedOn() {
+        fadeHandler.removeCallbacks(fadeIn);
+        fadeHandler.removeCallbacks(fadeOut);
+        super.setVolume(convertVol(maxVolumeRng), convertVol(maxVolumeRng));
+    }
+
+    public void setLockedOff() {
+        stop();
+        lockedOff=true;
+    }
+
+    public void unlock() {
+        lockedOff=false;
+        setVolMax();
     }
 
     public void setVol(int[] vols) {
@@ -143,6 +170,10 @@ public class MusicPlayer extends MediaPlayer {
 
     public void setInFocusNoFade(boolean focus) {
         this.inFocus = focus;
+    }
+
+    public boolean isLockedOff() {
+        return lockedOff;
     }
 
     public boolean isInFocus() { return inFocus; }

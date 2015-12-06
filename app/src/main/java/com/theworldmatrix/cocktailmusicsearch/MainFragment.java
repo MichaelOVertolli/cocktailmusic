@@ -1,8 +1,10 @@
 package com.theworldmatrix.cocktailmusicsearch;
 
 import android.content.ContentUris;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import java.io.IOException;
 public class MainFragment extends MusicFragment {
 
     private MainActivity main;
+    private SharedPreferences prefs;
 
     public static final int FOCUS = 0;
     public static final int RIGHT = 1;
@@ -64,6 +67,7 @@ public class MainFragment extends MusicFragment {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         main = (MainActivity) getActivity();
+        prefs = PreferenceManager.getDefaultSharedPreferences(main);
 
         focusLayout = (LinearLayout) view.findViewById(R.id.focusLayout);
         leftLayout = (LinearLayout) view.findViewById(R.id.leftContextLayout);
@@ -92,38 +96,66 @@ public class MainFragment extends MusicFragment {
         focusImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(FOCUS);
+                if (main.isInFocus(FOCUS)) {
+                    main.lock();
+
+                } else {
+                    main.setSongFocus(FOCUS);
+                }
             }
         });
         rightImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(RIGHT);
+                if (main.isInFocus(RIGHT)) {
+                    main.lock();
+
+                } else {
+                    main.setSongFocus(RIGHT);
+                }
             }
         });
         leftImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(LEFT);
+                if (main.isInFocus(LEFT)) {
+                    main.lock();
+
+                } else {
+                    main.setSongFocus(LEFT);
+                }
             }
         });
 
         focusText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(FOCUS);
+                if (main.isInFocus(FOCUS)) {
+                    main.lock();
+                } else {
+                    main.setSongFocus(FOCUS);
+                }
             }
         });
         rightText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(RIGHT);
+                if (main.isInFocus(RIGHT)) {
+                    main.lock();
+
+                } else {
+                    main.setSongFocus(RIGHT);
+                }
             }
         });
         leftText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                main.setSongFocus(LEFT);
+                if (main.isInFocus(LEFT)) {
+                    main.lock();
+                } else {
+                    main.setSongFocus(LEFT);
+                }
             }
         });
 
@@ -220,8 +252,10 @@ public class MainFragment extends MusicFragment {
 
     @Override
     public void setSongAssets(int location, Song song) {
-        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                Integer.parseInt(song.getAlbum_img()));
+//        Log.d("MainFragment", "Preferences: "+temp);
+        int display = Integer.parseInt(prefs.getString(MainActivity.DISPLAY_PREF, ""));
+        boolean songNames = prefs.getBoolean(MainActivity.SONG_PREF, true);
+        Uri uri;
         ImageButton imgBtn;
         TextView text;
         if (location == FOCUS) {
@@ -233,13 +267,38 @@ public class MainFragment extends MusicFragment {
         } else if (location == LEFT) {
             imgBtn=leftImage;
             text=leftText;
-        } else throw new Error("MainFragment: Invalid location.");
-        try {
-            Bitmap bmp = MediaStore.Images.Media.getBitmap(main.getContentResolver(), uri);
-            imgBtn.setImageBitmap(bmp);
+        } else throw new Error("MainFragment: Invalid location in setSongAssets.");
+        if (display == MainActivity.SONGS_ONLY_PREF_VAL) {
+            imgBtn.setImageResource(android.R.color.transparent);
+            text.setText(song.getTitle());
+            text.setBackgroundColor(getResources().getColor(R.color.white));
+        } else {
+            if (songNames) {
+                text.setText(song.getTitle());
+                text.setBackgroundColor(getResources().getColor(R.color.white));
+            }
+            else {
+                text.setText("");
+                text.setBackgroundColor(getResources().getColor(R.color.gray));
+            }
+            if (display == MainActivity.ALBUM_PREF_VAL) {
+                uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        Integer.parseInt(song.getAlbum_img()));
+                try {
+                    Bitmap bmp = MediaStore.Images.Media.getBitmap(main.getContentResolver(), uri);
+                    imgBtn.setImageBitmap(bmp);
+                } catch (IOException e) {e.printStackTrace();}
+            }
+            else if (display == MainActivity.ARTIST_PREF_VAL) {
+                uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        Integer.parseInt(song.getArtist_img()));
+                try {
+                    Bitmap bmp = MediaStore.Images.Media.getBitmap(main.getContentResolver(), uri);
+                    imgBtn.setImageBitmap(bmp);
+                } catch (IOException e) {e.printStackTrace();}
+            } else throw new Error("MainFragment: Invalid display preference value in setSongAssets.");
+
         }
-        catch (IOException e) {e.printStackTrace();}
-        text.setText(song.getTitle());
 
     }
 
